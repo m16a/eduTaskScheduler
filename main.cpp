@@ -9,10 +9,13 @@
 #include <unistd.h>
 #include <cmath>
 
+//defined in CMakeList.txt
+#ifdef INTEGRATE_EASY_PROFILER
 #define BUILD_WITH_EASY_PROFILER
-
 #include <easy/profiler.h>
-
+#else
+#define EASY_FUNCTION(a)
+#endif
 
 struct ITask
 {
@@ -20,16 +23,16 @@ struct ITask
 	virtual ~ITask() {}
 };
 
-template <typename T>
+template <typename F>
 struct CTask : public ITask
 {
-	CTask (T _pack) : pack(std::move(_pack)) {}
-	T	pack;
+    CTask (std::function<F>&& f) : pack(f) {}
+    std::packaged_task<F>	pack;
 
-	virtual void Call() override
-	{
-		pack();
-	}		
+    virtual void Call() override
+    {
+        pack();
+    }
 
 };
 
@@ -133,39 +136,41 @@ class TaskSheduller
 
 int main()
 {
+#if INTEGRATE_EASY_PROFILER
 	profiler::startListen();
+#endif
 
 	TaskSheduller ts;
 
 
 	for (int i=0; i<2000; ++i)
 	{
-		auto pT = new CTask<std::packaged_task<double(void)>>(std::packaged_task<double(void)>(Payload));
+	    auto lambdaFunc = [](){Payload();};
+		auto pT = new CTask<void()>(lambdaFunc);
 		auto shared = std::shared_ptr<ITask>(pT);
-		ts.AddTask(shared);	
+		ts.AddTask(shared);
 	}
 
 	for (int i=0; i<1000; ++i)
 	{
-		auto pT = new CTask<std::packaged_task<float(void)>>(std::packaged_task<float(void)>(Payload2));
+		auto pT = new CTask<float(void)>(Payload2);
 		auto shared = std::shared_ptr<ITask>(pT);
-		ts.AddTask(shared);	
+		ts.AddTask(shared);
 	}
 
 	{
-		auto pT = new CTask<std::packaged_task<float(void)>>(std::packaged_task<float(void)>(Payload2));
+		auto pT = new CTask<float(void)>(std::function<float(void)>(Payload));
 		auto future = pT->pack.get_future();
 		auto shared = std::shared_ptr<ITask>(pT);
-		ts.AddTask(shared);	
+		ts.AddTask(shared);
 
-		future.get();
+		future.get(); //wait all task, comment to skip
 	}
 
 	while (true)
 	{
 		std::cout << "Tasks: " << ts.TasksCount() << std::endl;
 		sleep(1);
-		//std::cout << "Pi: " << Payload() << std::endl;
 	}
 
 	return 0;
