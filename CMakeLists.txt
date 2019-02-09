@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.6.3)
-project(task_sheduller)
+project(task_scheduler)
 
 set (CMAKE_CXX_STANDARD 11)
 
@@ -15,6 +15,6 @@ if (${USE_PROFILER})
 		message(INFO " skip easy_profiler")
 endif (${USE_PROFILER})
 
-add_executable(task_sheduller ${SOURCES})
+add_executable(task_scheduler ${SOURCES})
 
-target_link_libraries(task_sheduller ${EASY_PROFILER_LIBRARY} pthread)
+target_link_libraries(task_scheduler ${EASY_PROFILER_LIBRARY} pthread)

@@ -59,16 +59,16 @@ float Payload2()
 	return sum;
 }
 
-class TaskSheduller
+class TaskScheduler
 {
 	public:
-	TaskSheduller(unsigned int n = std::thread::hardware_concurrency()) : m_ThreadsCount(n)
+	TaskScheduler(unsigned int n = std::thread::hardware_concurrency()) : m_ThreadsCount(n)
 	{
 		stop = false;
 		RunAllThreads();
 	}
 
-	~TaskSheduller()
+	~TaskScheduler()
 	{
 		stop = true;
 
@@ -109,7 +109,7 @@ class TaskSheduller
 	{
 		for (int i=0; i<m_ThreadsCount; i++)
 		{
-			m_threads.emplace_back(std::thread(&TaskSheduller::RunThread, this));
+			m_threads.emplace_back(std::thread(&TaskScheduler::RunThread, this));
 		}	
 	}
 
@@ -140,7 +140,7 @@ int main()
 	profiler::startListen();
 #endif
 
-	TaskSheduller ts;
+	TaskScheduler ts;
 
 
 	for (int i=0; i<2000; ++i)
