@@ -6,8 +6,12 @@
 #include <atomic>
 #include <future>
 #include <memory>
-#include <unistd.h>
 #include <cmath>
+#ifdef WIN32
+#include <windows.h>
+#else
+//#include <unistd.h>
+#endif
 
 //defined in CMakeList.txt
 #ifdef INTEGRATE_EASY_PROFILER
@@ -142,8 +146,7 @@ int main()
 
 	TaskScheduler ts;
 
-
-	for (int i=0; i<2000; ++i)
+	for (int i=0; i<20000; ++i)
 	{
 	    auto lambdaFunc = [](){Payload();};
 		auto pT = new CTask<void()>(lambdaFunc);
@@ -151,7 +154,7 @@ int main()
 		ts.AddTask(shared);
 	}
 
-	for (int i=0; i<1000; ++i)
+	for (int i=0; i<10000; ++i)
 	{
 		auto pT = new CTask<float(void)>(Payload2);
 		auto shared = std::shared_ptr<ITask>(pT);
@@ -164,13 +167,18 @@ int main()
 		auto shared = std::shared_ptr<ITask>(pT);
 		ts.AddTask(shared);
 
-		future.get(); //wait all task, comment to skip
+		//future.get(); //wait all task, comment to skip
 	}
 
 	while (true)
 	{
 		std::cout << "Tasks: " << ts.TasksCount() << std::endl;
+
+#ifdef WIN32
+		Sleep(1000);
+#else
 		sleep(1);
+#endif
 	}
 
 	return 0;

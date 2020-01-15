@@ -17,4 +17,8 @@ endif (${USE_PROFILER})
 
 add_executable(task_scheduler ${SOURCES})
 
-target_link_libraries(task_scheduler ${EASY_PROFILER_LIBRARY} pthread)
+if (WIN32)
+	target_link_libraries(task_scheduler ${EASY_PROFILER_LIBRARY})
+elseif (UNIX)
+	target_link_libraries(task_scheduler ${EASY_PROFILER_LIBRARY} pthread)
+endif()
